@@ -1,0 +1,91 @@
+\documentclass[11pt]{article}
+\usepackage[english]{babel}
+\usepackage[utf8x]{inputenc}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorinlistoftodos]{todonotes}
+\usepackage[T1]{fontenc}
+\usepackage{listings}
+\def\code{\lstinline[basicstyle=\ttfamily]}
+%\usepackage[margin=0cm]{geometry}
+\usepackage{hyperref}
+
+
+\begin{document}
+
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+\center % Center everything on the page
+ 
+%----------------------------------------------------------------------------------------
+%	HEADING SECTIONS
+%----------------------------------------------------------------------------------------
+
+\textsc{\LARGE Paris Diderot University}\\[1.5cm]
+\textsc{\Large Engineering School Denis Diderot}\\[0.5cm] 
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Dynamic memory allocation in c}\\[0.4cm] 
+\HRule \\[1.5cm]
+ 
+ \textsc{\large second year internship report}\\[1.5cm] 
+%----------------------------------------------------------------------------------------
+%	AUTHOR SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:}\\
+Mamadou Yéro \textsc{Baldé} % Your name
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Supervisor:} \\
+Mihaela \textsc{Sighireanu} % Supervisor's Name
+\end{flushright}
+\end{minipage}\\[2cm]
+
+%----------------------------------------------------------------------------------------
+%	DATE SECTION
+%----------------------------------------------------------------------------------------
+
+{\large \today}\\[0.1cm] % Date, change the \today to a set date if you want to be precise
+
+%----------------------------------------------------------------------------------------
+%	LOGO SECTION
+%----------------------------------------------------------------------------------------
+
+\includegraphics{figures/logo.png}\\[0cm] % Include a department/university logo - this will require the graphic package
+ 
+%----------------------------------------------------------------------------------------
+
+\vfill % Fill the rest of the page with whitespace
+
+\end{titlepage}
+
+%----------------------------------------------------------------------------------------
+%	ABSTRACT SECTION
+%----------------------------------------------------------------------------------------
+\begin{abstract}
+This report refers to the work I have completed during my summer internship with the IRIF at  Paris Diderot University - Paris 7 under the supervision of Mihaela Sighireanu. the work performed concern the study  of dynamic memory allocation.\\
+Dynamic memory allocation has been a fundamental part of most computer systems since roughly 1960, and memory allocation is widely considered to be either a solved problem or an insoluble one. In this report I'll describe a variety of Memory allocator design and ... 
+
+\end{abstract}
+
+%----------------------------------------------------------------------------------------
+%	Report CONTENT - CHAPTERS
+%----------------------------------------------------------------------------------------
+\include{chapters/chapter1}
+\include{chapters/chapter2}
+
+\bibliographystyle{plain}
+\bibliography{bibli}
+\end{document}

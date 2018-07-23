@@ -1,0 +1,52 @@
+\section{Dynamic memory allocation}
+
+
+Memory allocation is mainly a computer hardware operation which is managed through operating system and software applications. Its process is pretty similar to the physical and virtual memory management. Programs and services are assigned with a specific memory as per their requirements when they are executed. Once the program has finished its operation or is idle, the memory is released and allocated to another program or merged within the primary memory.\\
+
+Memory allocation has two core types:
+\begin{itemize}
+\item Static Memory Allocation: The program is allocated memory at compile time.
+\end{itemize}
+
+\begin{itemize}
+\item Dynamic Memory Allocation: The programs are allocated with memory at run time.
+\end{itemize}
+
+In this report, we will focus on the dynamic allocation of memory and its operation.
+
+\subsection{User interface}
+
+Dynamic Memory Allocation refers to managing system memory is when an executing program requests that the operating system give it a block of main memory. The program then uses this memory for some purpose. Usually the purpose is to add a node to a data structure. In object oriented languages, dynamic memory allocation is used to get the memory for a new object.\\
+
+The memory comes from above the static part of the data segment. Programs may request memory and may also return previously dynamically allocated memory. Memory may be returned whenever it is no longer needed. Memory can be returned in any order without any relation to the order in which it was allocated. The heap may develop ``holes'' where previously allocated memory has been returned between blocks of memory still in use.\\
+
+A new dynamic request for memory might return a range of addresses out of one of the holes. But it might not use up all the hole, so further dynamic requests might be satisfied out of the original hole.\\
+
+If too many small holes develop, memory is wasted because the total memory used by the holes may be large, but the holes cannot be used to satisfy dynamic requests. This situation is called memory fragmentation \cite{Knuth73a}. Keeping track of allocated and deallocated memory is complicated. A modern operating system does all this.\\
+
+Dynamic memory management in C programming language is performed via a group four functions namely \code{malloc()}, \code{calloc()}, \textbf{realloc()}, and \textbf{free()}.
+
+\subsection{What is malloc}
+malloc is a Standard C Library function which allocates memory chunks.
+The function signature is:
+\begin{lstlisting}
+void* malloc(size_t size);
+\end{lstlisting}
+
+
+
+\subsection{Goal for good allocators}
+An allocator must keep tracking parts of the memory which are in use and free.
+The main goals of a good allocator are \cite{Lea12}:
+\begin{enumerate}
+\item Maximizing compatibility\\
+
+\item Maximizing portability
+
+\item Minimizing space
+
+\item Minimizing time
+\item Maximizing tunability
+\item Maximizing Locality
+\item Maximizing error detection
+\end{enumerate}

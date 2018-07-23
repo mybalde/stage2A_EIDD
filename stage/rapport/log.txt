@@ -1,0 +1,52 @@
+27/06/2018
+test de l'implementation du malloc et du free de leslie ...
+-malloc ok
+-free après exécution rien ne se passe, le tableau est toujours là.
+
+documentation sur make
+
+28/06/2018
+-implementation du malloc avec un isfree sur 1 bit
+-revu et correction du code
+
+29/06/2018
+
+-revu et correction du code fait le 28/06
+-documentation sur latex
+-redaction du rapport( introduction+ presentation de l'irif+ motivation)
+
+02/07/2018
+-revu et correction du code fait le 28/06
+-test du code fait le 28/06 (malloc avec un free sur 1 bit)
+
+--malloc
+---allocation de la memoire ok
+---first fit ok 
+---split ok
+
+--free
+---free du pointeur ok
+---coalesce not ok
+
+03/07/2018
+-correction des erreurs du programme débuté le 28/06
+-test supplémentaire (tout est ok)
+-implementation du malloc avec un isfree sur 8 bits et un pointeur next
+-test du code
+--malloc
+---allocation de la memoire ok
+---first fit ok 
+---split not ok
+
+--free
+---free du pointeur ok
+---coalesce ok
+
+04/07/2018
+-correction des erreurs du programme débuté le 03/07
+-test supplémentaire (tout n'est pas ok)
+-documentation sur latex et redaction du rapport
+
+05/07/2018
+-correction des erreurs du programme débuté le 03/07
+test supplémentaire (tout est ok)
