@@ -1,16 +1,22 @@
 
-CC=gcc -g
-CCOBJ= main.o malloc.o
+CC= gcc
+CFLAGS= -Wall -g 
+CLIBS= -lcunit
+GCOVFLAGS= -Wall 
 
-all: user
+all: main
 
-user: $(CCOBJ)
-	$(CC) -o main $(CCOBJ) 
-
-.c.o: %.c
-	$(CC) -c -o $*.o $< 
+main: main.o malloc.o
+	$(CC) $(GCOVFLAGS) -o $@ $< $(CLIBS)
 
 clean:
-	rm *.o main
+	rm *.o main *~
+
+.SUFFIXES: .h .c .o
+
+%.o: %.c
+	$(CC) $(GCOVFLAGS) -c -o $@ $< 
+
 i:
 	indent *.c *.h
+

@@ -10,7 +10,7 @@ main: main.o malloc.o
 	$(CC) $(GCOVFLAGS) -o $@ $< $(CLIBS)
 
 clean:
-	rm *.o main
+	rm *.o main *~
 
 .SUFFIXES: .h .c .o
 

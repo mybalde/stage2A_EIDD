@@ -24,7 +24,9 @@ header *frhd;
 #define HDR_SET_SIZE(p,nh)	p->size = (((nh + 1) >> 1) << 1) & (~HDR_GET_STATUS(p))
 #define HDR_SET_STATUS(p)   p->size = p->size | 1
 #define HDR_UNSET_STATUS(p) p->size = p->size & (~1)
-void defrag (header * frhd);
+
+void defrag (header * );
+header* search (size_t);
 
 void
 cfree (void *p)
@@ -32,7 +34,7 @@ cfree (void *p)
     header *block = (header *) p;
     block = block - 1;
     //pointer on current block and last block
-    header *ptr, *last, *nxt;
+    header *ptr;
 
     //looking for wether the block exists
     for (ptr = (header *) global_base; ptr != (header *) global_end;
@@ -75,10 +77,9 @@ cfree (void *p)
     warm_boot ("free failed!\n");
 }
 
-void *
-cmalloc (size_t size)
+void *cmalloc (size_t size)
 {
-    header *block, *prev;
+    header *block = NULL;
     // size in header blocks
     size_t rsize = (size / BLOCK_SIZE + 1) + 1;
     rsize = ((rsize & 1) == 1) ? rsize + 1 : rsize;
@@ -101,60 +102,33 @@ cmalloc (size_t size)
     //finding a chunk with the First Fit Algorithm
     if (frhd)
     {
-        for (block = frhd; block; prev=block, block = block->nxt)
-        {
-            if (HDR_GET_STATUS (block) && HDR_GET_SIZE (block) >= rsize)
-            {
-                if (HDR_GET_SIZE (block) == rsize)
-                {
-                    block->size = rsize;
-                    //remove block from free list
-                    if (prev)
-                    {
-                        prev->nxt = block->nxt;
-                        break;
-					}
-                    else
-                    {
-                        frhd = block->nxt;
-                        break;
-                    }
-                }
-                else
-                {
-                    //splitting block
-					header *rblock = block + (HDR_GET_SIZE (block)-rsize);
-
-					rblock->size = rsize | 1;
-					block->size = (HDR_GET_SIZE (block)-rsize) & (~1);	// set status to 0
-					break;
-                }
-
-			}
-            prev = block;
-        }
+        block = search(rsize);
         if (block == NULL)
-           defrag (frhd);
-        
+        {
+			defrag (frhd);
+			block = search(rsize);
+		}
+		if (block)
+			 return (void *) (block + 1);
     }
 
-    // Failed to find free block
-    block = (header *) global_end;
-    block = sbrk (0);
-    // sbrk failed
-    if (sbrk (rsize * BLOCK_SIZE) == (void *) -1)
-        return NULL;
+		// Failed to find free block
+			block = global_end;
+			block = sbrk (0);
+		  // sbrk failed
+		  if (sbrk (rsize * BLOCK_SIZE) == (void *) -1)
+		return NULL;
 
-    block->size = rsize;
+		  block->size = rsize;
 
-    global_end = sbrk (0);
+		  global_end = sbrk (0);
+    
 
 
     return (void *) (block + 1);
 }
 
-void
-cscan ()
+void cscan ()
 {
     header *ptr = global_base;
     for (; ((void *) ptr) != global_end; ptr = HDR_GET_NEXT (ptr))
@@ -163,11 +137,11 @@ cscan ()
     printf ("-----------------------------------------------------\n");
 }
 
-void
-defrag (header * frhd)
+void defrag (header * frhd)
 {
     header *ptr = frhd; 
-    while(ptr) 
+    
+    while(ptr->nxt) 
     {
         if (ptr + HDR_GET_SIZE (ptr) == ptr->nxt)
         {
@@ -176,16 +150,42 @@ defrag (header * frhd)
             ptr->nxt = (ptr->nxt)->nxt;
         }
 		else
-			ptr = ptr->nxt;
+			ptr->nxt = (ptr->nxt)->nxt;
     }
 }
 
-void
-cscanfree ()
+header* search (size_t rsize)
 {
-    header *ptr = frhd;
-    for (; ptr ; ptr = ptr->nxt)
-        printf ("Chunk %p: size %ld, status %ld\n", ptr, HDR_GET_SIZE (ptr),
-                HDR_GET_STATUS (ptr));
-    
+	header* block, *prev;
+	
+    for (prev=NULL, block = frhd; block; prev=block, block = block->nxt)
+   {
+            if (HDR_GET_STATUS (block) && HDR_GET_SIZE (block) >= rsize)
+            {
+                if (HDR_GET_SIZE (block) == rsize)
+                {
+                    block->size = rsize;
+                    //remove block from free list
+                    if (prev)
+                        prev->nxt = block->nxt;
+                    else
+                        frhd = block->nxt;
+                    
+                    return block;
+                }
+                else
+                {
+                    //splitting block
+					header *rblock = block + (HDR_GET_SIZE (block)-rsize);
+
+					rblock->size = rsize ;
+					block->size = (HDR_GET_SIZE (block)-rsize) | 1;	// set status to 0
+					
+					return rblock;
+                }
+
+			}
+
+    }
+    return NULL;
 }
