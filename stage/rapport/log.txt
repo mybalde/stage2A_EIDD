@@ -6,7 +6,7 @@ test de l'implementation du malloc et du free de leslie ...
 documentation sur make
 
 28/06/2018
--implementation du malloc avec un isfree sur 1 bit
+-implementation du malloc avec un isfree sur 1 bit et la politique first fit
 -revu et correction du code
 
 29/06/2018
@@ -49,4 +49,61 @@ documentation sur make
 
 05/07/2018
 -correction des erreurs du programme débuté le 03/07
+-test supplémentaire (tout n'est pas ok)
+
+..
+..meme taches
+..
+
+08/07/2018
+-correction des erreurs du programme débuté le 03/07
+-test supplémentaire (tout est presque ok)
+
+09/07/2018
+-correction des erreurs du programme débuté le 03/07
+-test supplémentaire (tout est ok)
+
+10/07/2018
+-implementation du malloc avec un isfree sur 1 bit et la politique best fit
+-revu et correction du code
+
+..
+..
+..
+
+13/07/2018
+revu et correction du code du 10/07/2018
 test supplémentaire (tout est ok)
+
+..
+..
+..
+
+16/07/2018
+-implementation du malloc avec un isfree sur 1 bit , la politique first fit, free list, lazy free
+-revu et correction du code ( quelques bugs)
+-documentation sur cunit
+
+..
+..
+..
+
+18/07/2018
+-revu et correction de code ( quelques bugs)
+-codage des fichiers de tests
+-redaction memoire
+
+..
+..
+..
+
+23/07/2018
+-revu et correction de code ( quelques bugs)
+-revu et correction du memoire
+
+24/072018
+-revu et correction de code ( quelques bugs)
+-revu et correction du memoire
+-redaction memoire
+
+
