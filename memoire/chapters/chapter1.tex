@@ -2,24 +2,16 @@
 %	INTRODUCTION SECTION
 %----------------------------------------------------------------------------------------
 \section{Introduction}
-\label{sec:introduction}
+% Context du stage, que as tu fait, ou, quand, resultats.
 
-Context du stage, que as tu fait, ou, quand, resultats.
+This report refers to the work I have completed during my summer internship with the IRIF at  Paris Diderot University - Paris 7 under the supervision of Mihaela Sighireanu. The work performed concern the study  of dynamic memory allocation , programming some allocators and testing their efficiency.\\
 
-la suite dans l'entete du chapitre 2
+Dynamic memory allocation has been a fundamental part of most computer systems since roughly 1960, and memory allocation is widely considered to be either a solved problem or an insoluble one.\\
 
-Memory allocation is mainly a computer hardware operation which is managed through operating system and software applications. Its process is pretty similar to the physical and virtual memory management. Programs and services are assigned with a specific memory as per their requirements when they are executed. Once the program has finished its operation or is idle, the memory is released and allocated to another program or merged within the primary memory.\\
+ In this report I'll describe a variety of Memory allocator design first and then, I will explain how I manage to test my programs.
 
-Memory allocation has two core types:
-\begin{itemize}
-\item Static Memory Allocation: The program is allocated memory at compile time.
-\end{itemize}
 
-\begin{itemize}
-\item Dynamic Memory Allocation: The programs are allocated with memory at run time.
-\end{itemize}
 
-In this report, we will focus on the dynamic allocation of memory and its operation.
 
 %----------------------------------------------------------------------------------------
 %	Presentation of IRIF SECTION
@@ -89,10 +81,17 @@ I've done my internship the the ``modeling and verification'' team, which studie
 %	Motivation SECTION
 %----------------------------------------------------------------------------------------
 \subsection{Motivation}
+Allocators are small programs which are difficult to design because they use some primitives of complex programming: arithmetic of pointers, bitwise operations, system calls (for the expansion of process memory).   
+Furthermore, data structures are quite complex : heap list (the next gotten with arithmetic of pointer) , linked lists, circular, binary search trees, hash table.\\
 
-les allocateurs sont des programmes petits mais tres difficiles à mettre au point car ils appellent des primitives de programmation complexes: arithmetiques de pointeur, operations bit à bit, appels aux systeme (pour etendre la memoire du processus). De plus, les structures de données sont assez complexes: heap-listes (chnamps next obtenu avec arithmetique de pointeur), listes doublement chainées, circulaires, arbres binaires de rechrche, table de hashage. 
+In the order to implement these programs, formal verification techniques have been developed. Those techniques are based on some logics of programs (logic of Hoare). My work has provided testing programs for these techniques.\\
 
-Pour mettre au point ce programmes, des techniques de verification formelles ont été developpées. Ces techniques sont basées sur des logiques de programmes (logique de Hoare). Mon travail a fournit des programmes de test de ces techniques.
+In my internship I developed some of these allocators using unit testing and the CUNIT library.\\
+
+% les allocateurs sont des programmes petits mais tres difficiles à mettre au point car ils appellent des primitives de programmation complexes: arithmetiques de pointeur, operations bit à bit, appels aux systeme (pour etendre la memoire du processus). De plus, les structures de données sont assez complexes: heap-listes (chnamps next obtenu avec arithmetique de pointeur), listes doublement chainées, circulaires, arbres binaires de rechrche, table de hashage. 
+
+% Pour mettre au point ce programmes, des techniques de verification formelles ont été developpées. Ces techniques sont basées sur des logiques de programmes (logique de Hoare). Mon travail a fournit des programmes de test de ces techniques.
 
 
-Dans mon stage j'ai mis au point ces allocateurs en utilisant du test unitaire et la  bibliotheque CUNIT.
+% Dans mon stage j'ai mis au point ces allocateurs en utilisant du test unitaire et la  bibliotheque CUNIT.
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

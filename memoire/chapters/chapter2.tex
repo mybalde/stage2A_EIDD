@@ -1,6 +1,5 @@
 \section{Dynamic memory allocation}
 
-
 Memory allocation is mainly a computer hardware operation which is managed through operating system and software applications. Its process is pretty similar to the physical and virtual memory management. Programs and services are assigned with a specific memory as per their requirements when they are executed. Once the program has finished its operation or is idle, the memory is released and allocated to another program or merged within the primary memory.\\
 
 Memory allocation has two core types:
@@ -33,6 +32,9 @@ The function signature is:
 void* malloc(size_t size);
 \end{lstlisting}
 
+The two core elements of the malloc algorithm have remained unchanged since the earliest versions:
+
+\textbf{Boundary Tags}
 
 
 \subsection{Goal for good allocators}
