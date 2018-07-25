@@ -23,18 +23,20 @@ A new dynamic request for memory might return a range of addresses out of one of
 
 If too many small holes develop, memory is wasted because the total memory used by the holes may be large, but the holes cannot be used to satisfy dynamic requests. This situation is called memory fragmentation \cite{Knuth73a}. Keeping track of allocated and deallocated memory is complicated. A modern operating system does all this.\\
 
-Dynamic memory management in C programming language is performed via a group four functions namely \code{malloc()}, \code{calloc()}, \textbf{realloc()}, and \textbf{free()}.
+Two functions make it possible to reserve and release dynamically an area of memory: \code{malloc()} for the reservation and the liberation of previously allocated memory via \code{malloc()} is provided by the \code{free()} function.
 
 \subsection{What is malloc}
-malloc is a Standard C Library function which allocates memory chunks.
+malloc is a C Standard Library function which allocates memory chunks.
 The function signature is:
 \begin{lstlisting}
 void* malloc(size_t size);
 \end{lstlisting}
 
-The two core elements of the malloc algorithm have remained unchanged since the earliest versions:
+The only parameter to pass to malloc is the number of bytes to allocate. The returned value is the address of the first byte of the allocated memory area. If the allocation could not be realized (due to lack of free memory), the return value is the NULL constant.
 
-\textbf{Boundary Tags}
+% The two core elements of the malloc algorithm have remained unchanged since the earliest versions:
+
+% \textbf{Boundary Tags}
 
 
 \subsection{Goal for good allocators}
@@ -52,3 +54,36 @@ The main goals of a good allocator are \cite{Lea12}:
 \item Maximizing Locality
 \item Maximizing error detection
 \end{enumerate}
+
+\section{The heap and System calls}
+Before writing a first malloc, we need to understand how memory is handled in most operating systems.We will keep an abstract point of view for that part, since many details are system and
+hardware dependent.
+
+\subsection{The Process’s Memory}
+Each process has its own virtual address space dynamically translated into physical memory  address space by the MMU (and the kernel.) This space is divided in several part, all that we have to know is that we found at least some space for the code, a stack where local and volatile data are stored, some space for constant and global variables and an unorganized space for program’s data called the heap.
+The heap is a continuous (in terms of virtual addresses) space of memory with three bounds: a starting point, a maximum limit (managed through \code{sys/resource.h}’s functions \code{getrlimit()} and \code{setrlimit()}) and an end point called the break. The break marks the end of the mapped memory space, that is, the part of the virtual address space that has correspondence into real memory. 
+% Figure
+% 1
+% sketches the memory organisation.
+
+\subsection{Syscall}
+In order to code a malloc, we need to know where the heap begin and the break position,
+and of course we need to be able to move the break. This the purpose of the two syscalls \code{brk()} and \code{sbrk()}.\\
+The functions signature:
+\begin{lstlisting}
+int brk(const void *addr);
+void* sbrk(intptr_t incr);
+\end{lstlisting}
+\code{brk()} and \code{sbrk()} change the location of the program break, which defines the end of the process's data segment (i.e., the program break is the first location after the end of the uninitialized data segment). Increasing the program break has the effect of allocating memory to the process; decreasing the break deallocates memory.
+
+\code{brk()} sets the end of the data segment to the value specified by addr, when that value is reasonable, the system has enough memory, and the process does not exceed its maximum data size.
+
+\code{sbrk()} increments the program's data space by increment bytes. Calling \code{sbrk()} with an increment of 0 can be used to find the current location of the program break.
+
+On success, \code{brk()} returns zero. On error, -1 is returned, and \code{errno} is set to \code{ENOMEM}.
+
+On success, \code{sbrk()} returns the previous program break. (If the break was increased, then this value is a pointer to the start of the newly allocated memory). On error, \code{(void *) -1} is returned, and \code{errno} is set to \code{ENOMEM}. 
+
+We will use \code{sbrk()} as our main tool to implement malloc. All we have to do is to acquire more space (if needed) to fulfill the query.
+
+\section{The design}
