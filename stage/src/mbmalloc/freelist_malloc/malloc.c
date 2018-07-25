@@ -40,7 +40,7 @@ cfree(void *p)
   header* ptr;
 
 #ifdef VERBOSE_M
-    printf("\t- search address %p\n", block);
+    printf("\n  - search address %p\n", block);
 #endif
 
   /* looking for if the block exists */
@@ -81,7 +81,7 @@ cfree(void *p)
 	ptr->nxt = tmp->nxt;
 	tmp->nxt = ptr;
       } else {
-        // if (frhd > ptr)
+        assert (frhd > ptr);
 	block->nxt = frhd;
 	frhd = block;
       }
@@ -188,7 +188,7 @@ search(size_t rsize)
       if (HDR_GET_SIZE(block) == rsize) {
 	/* no need to split */
         block->size = rsize;
-	//remove block from free list
+	/* remove block from free list */
         if (prev)
 	  prev->nxt = block->nxt;
 	else
