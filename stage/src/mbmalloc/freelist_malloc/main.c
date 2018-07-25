@@ -17,13 +17,13 @@ clean_suite_cm ()
 void
 test_couverture_instruction ()
 {
-    void *v = cmalloc (10);
-    void *v1 = cmalloc (10);
-    cfree (v1);
-    v1 = cmalloc (10);
-    cfree (v);
-    cfree (v1);
-};
+  void *v = cmalloc (10);
+  void *v1 = cmalloc (10);
+  cfree (v1);
+  v1 = cmalloc (10);
+  cfree (v);
+  cfree (v1);
+}
 
 void
 test_couverture_mcdc ()
@@ -32,84 +32,83 @@ test_couverture_mcdc ()
 
   printf ("\n");
   a = cmalloc (3 * sizeof (int));
-  cscan ();
+  cscan ("1st malloc");
   printf ("a : adresse %p\n", a);
 
   printf ("-----------------------------------------------------\n");
   b = cmalloc (7 * sizeof (int));
-  cscan ();
+  cscan ("2nd malloc");
   printf ("\nb : adresse %p\n", b);
 
   printf ("-----------------------------------------------------\n");
   c = cmalloc (2 * sizeof (int));
-  cscan ();
+  cscan ("3rd malloc");
   printf ("\nc : adresse %p\n", c);
 
   printf ("-----------------------------------------------------\n");
   d = cmalloc (2 * sizeof (int));
-  cscan ();
-  printf ("\nd : adresse %p\n", c);
-  
+  cscan ("4th malloc");
+  printf ("\nd : adresse %p\n", d);
+
   printf ("-----------------------------------------------------\n");
   printf ("\na : free\n\n");
   cfree (a);
-  cscan ();
+  cscan ("1st free (a)");
 
   printf ("-----------------------------------------------------\n");
   printf ("\nb : free\n\n");
   cfree (b);
-  cscan ();
+  cscan ("2nd free (b)");
 
   printf ("-----------------------------------------------------\n");
   printf ("\nc : free\n\n");
   cfree (c);
-  cscan ();
-  
+  cscan ("3rd free (c)");
+
   printf ("-----------------------------------------------------\n");
   printf ("\nd : free\n\n");
-  //cfree (d);
-  cscan ();
+  cfree (d);
+  cscan ("4th free (d)");
 
   printf ("-----------------------------------------------------\n");
   e = cmalloc (2 * sizeof (int));
-  cscan ();
+  cscan ("5th malloc");
   printf ("\ne : adresse %p\n", e);
 
   printf ("-----------------------------------------------------\n");
   a = cmalloc (20 * sizeof (int));
-  cscan ();
+  cscan ("6th malloc");
   printf ("\na : adresse %p\n", a);
 
   printf ("-----------------------------------------------------\n");
   b = cmalloc (12 * sizeof (int));
-  cscan ();
+  cscan ("7th malloc");
   printf ("\nb : adresse %p\n", b);
-	
-	printf ("-----------------------------------------------------\n");
+
+  printf ("-----------------------------------------------------\n");
   printf ("\na : free\n\n");
   cfree (a);
-  cscan ();
-  
+  cscan ("5th free (a = 6th malloc)");
+
   printf ("-----------------------------------------------------\n");
   c = cmalloc (14 * sizeof (int));
-  cscan ();
+  cscan ("8th malloc");
   printf ("\nb : adresse %p\n", c);
-  
-};
+
+}
 
 void
 test_free ()
 {
   // precondition fonctionnement normal
   void *v = cmalloc (10);
-  //tests
+  // tests
   cfree (v);
   header *mcb;
   mcb = v - sizeof (header);
   CU_ASSERT_EQUAL (HDR_GET_STATUS (mcb), 1);
   CU_ASSERT_PTR_NOT_NULL (frhd);
 }
-
 
 
 void
@@ -177,8 +176,6 @@ main ()
       CU_cleanup_registry ();
       return CU_get_error ();
     }
-
-
 
   /* Run all tests using the CUnit Basic interface */
   CU_basic_set_mode (CU_BRM_VERBOSE);

@@ -1,8 +1,9 @@
 
 CC= gcc
-CFLAGS= -Wall -g 
+VERBOSE=-DVERBOSE_M
+CFLAGS= -Wall -g $(VERBOSE)
 CLIBS= -lcunit
-GCOVFLAGS= -Wall 
+GCOVFLAGS= -Wall $(VERBOSE) 
 
 all: main
 
