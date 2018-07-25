@@ -106,4 +106,7 @@ test supplémentaire (tout est ok)
 -revu et correction du memoire
 -redaction memoire
 
-
+25/072018
+-revu et correction de code ( quelques bugs)
+-redaction memoire
+-utilisation de git en ligne de commande
