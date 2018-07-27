@@ -26,18 +26,21 @@ If too many small holes develop, memory is wasted because the total memory used 
 Two functions make it possible to reserve and release dynamically an area of memory: \code{malloc()} for the reservation and the liberation of previously allocated memory via \code{malloc()} is provided by the \code{free()} function.
 
 \subsection{What is malloc}
-malloc is a C Standard Library function which allocates memory chunks.
+malloc is a C Standard Library function which is used to allocate a block of memory on the heap. The program accesses this block of memory via a pointer that malloc returns.
 The function signature is:
 \begin{lstlisting}
 void* malloc(size_t size);
 \end{lstlisting}
 
-The only parameter to pass to malloc is the number of bytes to allocate. The returned value is the address of the first byte of the allocated memory area. If the allocation could not be realized (due to lack of free memory), the return value is the NULL constant.
+The only parameter to pass to malloc is the number of bytes to allocate. The returned value is the address of the first byte of the allocated memory area. If the allocation could not be realized (due to lack of free memory), the return value is the \code{NULL} constant.
 
-% The two core elements of the malloc algorithm have remained unchanged since the earliest versions:
-
-% \textbf{Boundary Tags}
-
+\subsection{Memory release}
+When memory returned by \code{malloc()} is no longer useful, it doesn't get freed on its own. In the order to release the space allocated before we should explicitly use another C Standard Library function: \code{free()} .
+The function signature is:
+\begin{lstlisting}
+void free(void *ptr);
+\end{lstlisting}
+\code{free()} frees the memory space pointed by ptr, which was obtained on a previous call to \code{malloc()}. If it has already been released with \code{free(ptr)}, the behavior is undetermined. If ptr is \code{NULL}, no attempt to release takes place.
 
 \subsection{Goal for good allocators}
 An allocator must keep tracking parts of the memory which are in use and free.
@@ -54,26 +57,33 @@ The main goals of a good allocator are \cite{Lea12}:
 \item Maximizing Locality
 \item Maximizing error detection
 \end{enumerate}
-
-\section{The heap and System calls}
-Before writing a first malloc, we need to understand how memory is handled in most operating systems.We will keep an abstract point of view for that part, since many details are system and
+\clearpage
+\section{Heap and System call}
+In the order to implement malloc, we need to understand how memory is handled in most operating systems.We will keep an abstract point of view for that part, since many details are system and
 hardware dependent.
 
 \subsection{The Process’s Memory}
-Each process has its own virtual address space dynamically translated into physical memory  address space by the MMU (and the kernel.) This space is divided in several part, all that we have to know is that we found at least some space for the code, a stack where local and volatile data are stored, some space for constant and global variables and an unorganized space for program’s data called the heap.
-The heap is a continuous (in terms of virtual addresses) space of memory with three bounds: a starting point, a maximum limit (managed through \code{sys/resource.h}’s functions \code{getrlimit()} and \code{setrlimit()}) and an end point called the break. The break marks the end of the mapped memory space, that is, the part of the virtual address space that has correspondence into real memory. 
-% Figure
-% 1
-% sketches the memory organisation.
+Every process has its own virtual address space which is dynamically translated into physical memory  address space by the memory management unit ``MMU'', (and the kernel.) This space is divided in several parts, and what we should know is that we have found at least some space for the code, a stack where local and volatile data are stored, some space for constant and global variables and an unorganized space for program’s data called the heap.\\
 
-\subsection{Syscall}
-In order to code a malloc, we need to know where the heap begin and the break position,
-and of course we need to be able to move the break. This the purpose of the two syscalls \code{brk()} and \code{sbrk()}.\\
-The functions signature:
+The heap is a continuous (in terms of virtual addresses) space of memory blocks with three bounds: a starting point, a maximum limit (managed through \code{sys/resource.h}’s functions \code{getrlimit()} and \code{setrlimit()}) and an end point called the break. The break marks the end of the mapped memory space, that is, the part of the virtual address space that has correspondence into real memory.\\
+
+\begin{figure}[htpb]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/heap}
+    \caption{Memory organisation}
+    \label{default}
+    \end{center}
+\end{figure}
+
+\subsection{Syscalls}
+We need to know where the heap begin, the break point position,and of course we need to be able to move the break to implement malloc. This is the purpose of the two syscalls \code{brk()} and \code{sbrk()}.\\
+
+The functions signature are:
 \begin{lstlisting}
 int brk(const void *addr);
 void* sbrk(intptr_t incr);
 \end{lstlisting}
+
 \code{brk()} and \code{sbrk()} change the location of the program break, which defines the end of the process's data segment (i.e., the program break is the first location after the end of the uninitialized data segment). Increasing the program break has the effect of allocating memory to the process; decreasing the break deallocates memory.
 
 \code{brk()} sets the end of the data segment to the value specified by addr, when that value is reasonable, the system has enough memory, and the process does not exceed its maximum data size.
@@ -82,8 +92,76 @@ void* sbrk(intptr_t incr);
 
 On success, \code{brk()} returns zero. On error, -1 is returned, and \code{errno} is set to \code{ENOMEM}.
 
-On success, \code{sbrk()} returns the previous program break. (If the break was increased, then this value is a pointer to the start of the newly allocated memory). On error, \code{(void *) -1} is returned, and \code{errno} is set to \code{ENOMEM}. 
+On success, \code{sbrk()} returns the previous program break. (If the break was increased, then this value is a pointer to the start of the newly allocated memory). On error, \code{(void *) -1} is returned, and \code{errno} is set to \code{ENOMEM}.\\
 
-We will use \code{sbrk()} as our main tool to implement malloc. All we have to do is to acquire more space (if needed) to fulfill the query.
+\subsubsection{Example:}
+
+\begin{lstlisting}
+void minit(int size) 
+{ hst=sbrk(size); hli=sbrk(0); }
+\end{lstlisting}
+
+\begin{figure}[htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/sbrk}
+    \caption{System call for memory extension}
+    \label{}
+    \end{center}
+\end{figure}
+
+We will use \code{sbrk()} as main tool to implement malloc because the only thing we need is to acquire more space (if needed) to fulfill queries.
 
 \section{The design}
+ Allocators are categorized by the mechanism they use to track which part of the memory is free and coalescing free chunks.
+In what follows, I will explain step by step the design of several allocators.
+
+\subsection{How to represent block information}
+At the beginning of every chunk,we should have a small block that contains the extra-informations, called meta-data. This block should contain some informations like pointer on the previous and next chunk, a flag to mark free chunks and the data chunk size and it is placed before the pointer returned by malloc.
+
+\begin{figure}[htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/chunk}
+    \caption{Chunk's representation }
+    \label{chunkrep}
+    \end{center}
+\end{figure}
+
+In C we can represent the block by the following structure :
+\begin{lstlisting}
+typedef struct header
+{
+  size_t size;
+  int isfree;
+  struct header *prev;
+  struct header *nxt;
+} header;
+\end{lstlisting}
+
+To lighten up our program, we can reduce all this to a simple variable and the meta-data block can be defined in C as:
+\begin{lstlisting}
+typedef size_t header;
+\end{lstlisting}
+Notice that this is quite enough to implement an allocator since we can get the bock size by doing a bitwise operation and the following chunk by summing the current chunk chunk and the size but also encode the free flag in 1 bit with this variable.
+\begin{lstlisting}
+typedef size_t header;
+\end{lstlisting}
+
+To make the allocation and deallocation operations very simple, another data structure can be used: the free list which operates by connecting unallocated regions of memory together in a linked list. In the above structure  the field ``nxt'' will help us to build it.
+To implement an allocator with a free list, we can use the structure below:
+\begin{lstlisting}
+typedef struct header
+{
+  size_t size;			
+  struct header *nxt;
+} header;
+\end{lstlisting}
+
+The figure \ref{chunkrep} presents an example of heap organization with meta-data in front of the allocated block. Each data chunk has a meta-data block followed by a data block. Note that the pointer returned by malloc points on the data block, not on the whole chunk.\\
+
+\subsection{How to find a chunk}
+
+\subsubsection{First-fit method}
+
+\subsubsection{Best-fit method}
+
+\subsection{Extension of the heap}
