@@ -1,0 +1,63 @@
+\section{Allocators implementation and tests}
+The purpose of unit tests is to verify the expected behavior of a function with respect to a given specification. Here the lack of precise specification forces us to define requirements of these functions, what behaviors are expected or not.
+
+One of the goals of this internship is to conduct a series of tests on the different implementations of the \code{malloc()} and \code{free()} functions. As a result, I implemented 3 allocators in order to perform tests.
+
+After describing the implemented allocator, we will first carry out functional tests and subsequently cover tests (test of instruction and condition, decision or mcdc, this choice will be explained in the following).
+
+The functional tests will consist of a call for each function, and their expected answers. The individual tests will be performed out of any context of use while the test suites will verify a succession of several orders.
+
+\subsection{Leslie Aldrige's allocator}
+I began first by trying to understand the allocator written by Leslie Aldrige to get an idea about the implementation of allocators, and I noticed several bugs in his implementation, so I fixed them all, and compiled it to see the results. This implementation is based on the first fit method, using a free list. After that, I implemented three Allocators with Different policies \cite{Aldridge08}.
+Here is the revised version of Aldrige's code :\\
+Header file
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/lamalloc/leslie.h}
+C file
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/lamalloc/leslie.c}
+main file
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/lamalloc/user_leslie.c}
+
+\subsection{First version}
+This first implementation is based on the first fit method with early coalescing. As soon as a block is released, checks are made to merge the contiguous blocks.
+
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/FF_malloc/malloc.h}
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/FF_malloc/malloc.c}
+For the code test, we will first perform tests on the functions in individual ways, out of any context of use and those for each of the functions present.
+Then we will perform the tests in a context of use with a succession of function call.
+\subsubsection{test of malloc}
+In this test, we try to do some kind of dynamic allocation to make sure that it works properly and then we check that the heap start and the break are not \code{NULL}.
+
+\subsubsection{test of free}
+In this test, we try to do some dynamic allocation and we release the memory and then we try to see the state of the block to ensure the proper functioning of the function.
+
+\subsubsection{Statement Coverage}
+In this test, we try to check all the main lines of the code. We first check that heap start and heap end are \code{NULL} before making an allocation then we check that heap start and heap end are not \code{NULL} and we release the allocated memory.
+\subsubsection{MC/DC cover}
+In software testing, the modified condition/decision coverage (MC/DC) is a code coverage criterion that requires all of the below during testing:
+
+ \begin{enumerate}
+\item Each entry and exit point is invoked
+\item Each decision takes every possible outcome
+\item Each condition in a decision takes every possible outcome
+\item Each condition in a decision is shown to independently affect the outcome of the decision.
+\end{enumerate}
+
+In this test, I made several malloc and free to make sure that the merge blocks, the algorithm used and all the conditions were respected.
+
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/FF_malloc/main.c}
+
+\subsection{Second version}
+This second implementation is based on the best fit method with early coalescing. As soon as a block is released, checks are made to merge the contiguous blocks.
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/BF_malloc/malloc.h}
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/BF_malloc/malloc.c}
+The tests remain the same as for the first implementation.
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/BF_malloc/main.c}
+
+\subsection{Third version}
+This third implementation is based on the first fit method with a free list. 
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/freelist_malloc/malloc.h}
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/freelist_malloc/malloc.c}
+The tests remain the same as for the first implementation.
+
+
+\lstinputlisting[basicstyle=\ttfamily,style=cstyle]{src/mbmalloc/freelist_malloc/main.c}

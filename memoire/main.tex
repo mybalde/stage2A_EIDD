@@ -10,6 +10,34 @@
 \def\code{\lstinline[basicstyle=\ttfamily]}
 %\usepackage[margin=0cm]{geometry}
 \usepackage{hyperref}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{xcolor}
+
+\definecolor{mGreen}{rgb}{0,0.6,0}
+\definecolor{mGray}{rgb}{0.5,0.5,0.5}
+\definecolor{mPurple}{rgb}{0.58,0,0.82}
+\definecolor{backgroundColour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{cstyle}{
+    backgroundcolor=\color{backgroundColour},   
+    commentstyle=\color{mGreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{mGray},
+    stringstyle=\color{mPurple},
+    basicstyle=\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2,
+    language=C
+}
 
 
 \begin{document}
@@ -30,6 +58,7 @@
 %----------------------------------------------------------------------------------------
 %	TITLE SECTION
 %----------------------------------------------------------------------------------------
+
 
 \HRule \\[0.4cm]
 { \huge \bfseries Dynamic memory allocation in c}\\[0.4cm] 
@@ -72,13 +101,14 @@ Mihaela \textsc{Sighireanu} % Supervisor's Name
 
 \end{titlepage}
 
-
+\tableofcontents
 
 %----------------------------------------------------------------------------------------
 %	Report CONTENT - CHAPTERS
 %----------------------------------------------------------------------------------------
 \include{chapters/chapter1}
 \include{chapters/chapter2}
+\include{chapters/chapter3}
 
 \bibliographystyle{plain}
 \bibliography{bibli}

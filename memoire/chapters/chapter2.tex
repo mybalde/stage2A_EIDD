@@ -28,7 +28,8 @@ Two functions make it possible to reserve and release dynamically an area of mem
 \subsection{What is malloc}
 malloc is a C Standard Library function which is used to allocate a block of memory on the heap. The program accesses this block of memory via a pointer that malloc returns.
 The function signature is:
-\begin{lstlisting}
+
+\begin{lstlisting}[style=cstyle]
 void* malloc(size_t size);
 \end{lstlisting}
 
@@ -37,7 +38,7 @@ The only parameter to pass to malloc is the number of bytes to allocate. The ret
 \subsection{Memory release}
 When memory returned by \code{malloc()} is no longer useful, it doesn't get freed on its own. In the order to release the space allocated before we should explicitly use another C Standard Library function: \code{free()} .
 The function signature is:
-\begin{lstlisting}
+\begin{lstlisting}[style=cstyle]
 void free(void *ptr);
 \end{lstlisting}
 \code{free()} frees the memory space pointed by ptr, which was obtained on a previous call to \code{malloc()}. If it has already been released with \code{free(ptr)}, the behavior is undetermined. If ptr is \code{NULL}, no attempt to release takes place.
@@ -46,18 +47,36 @@ void free(void *ptr);
 An allocator must keep tracking parts of the memory which are in use and free.
 The main goals of a good allocator are \cite{Lea12}:
 \begin{enumerate}
-\item Maximizing compatibility\\
+\item Maximizing compatibility
+\end{enumerate}
+The implemented allocator must be compatible with ANSI/POSIX conventions.
 
+\begin{enumerate}
 \item Maximizing portability
-
+\end{enumerate}
+The allocator must cover as many systems as possible.
+\begin{enumerate}
 \item Minimizing space
+\end{enumerate}
+The allocator shouldn't waste space and track contiguous chunk to minimize fragmentation.
 
+\begin{enumerate}
 \item Minimizing time
+\end{enumerate}
+The time for allocation and release of memory should be as short as possible.
+
+\begin{enumerate}
 \item Maximizing tunability
+\end{enumerate}
+
+\begin{enumerate}
 \item Maximizing Locality
+\end{enumerate}
+
+\begin{enumerate}
 \item Maximizing error detection
 \end{enumerate}
-\clearpage
+%\clearpage
 \section{Heap and System call}
 In the order to implement malloc, we need to understand how memory is handled in most operating systems.We will keep an abstract point of view for that part, since many details are system and
 hardware dependent.
@@ -67,7 +86,7 @@ Every process has its own virtual address space which is dynamically translated 
 
 The heap is a continuous (in terms of virtual addresses) space of memory blocks with three bounds: a starting point, a maximum limit (managed through \code{sys/resource.h}’s functions \code{getrlimit()} and \code{setrlimit()}) and an end point called the break. The break marks the end of the mapped memory space, that is, the part of the virtual address space that has correspondence into real memory.\\
 
-\begin{figure}[htpb]
+\begin{figure}[H]
     \begin{center}
         \includegraphics[width=0.8\textwidth]{figures/heap}
     \caption{Memory organisation}
@@ -79,7 +98,7 @@ The heap is a continuous (in terms of virtual addresses) space of memory blocks 
 We need to know where the heap begin, the break point position,and of course we need to be able to move the break to implement malloc. This is the purpose of the two syscalls \code{brk()} and \code{sbrk()}.\\
 
 The functions signature are:
-\begin{lstlisting}
+\begin{lstlisting}[style=cstyle]
 int brk(const void *addr);
 void* sbrk(intptr_t incr);
 \end{lstlisting}
@@ -96,7 +115,7 @@ On success, \code{sbrk()} returns the previous program break. (If the break was 
 
 \subsubsection{Example:}
 
-\begin{lstlisting}
+\begin{lstlisting}[style=cstyle]
 void minit(int size) 
 { hst=sbrk(size); hli=sbrk(0); }
 \end{lstlisting}
@@ -111,7 +130,7 @@ void minit(int size)
 
 We will use \code{sbrk()} as main tool to implement malloc because the only thing we need is to acquire more space (if needed) to fulfill queries.
 
-\section{The design}
+\section{How to implement allocator}
  Allocators are categorized by the mechanism they use to track which part of the memory is free and coalescing free chunks.
 In what follows, I will explain step by step the design of several allocators.
 
@@ -127,7 +146,7 @@ At the beginning of every chunk,we should have a small block that contains the e
 \end{figure}
 
 In C we can represent the block by the following structure :
-\begin{lstlisting}
+\begin{lstlisting}[style=cstyle]
 typedef struct header
 {
   size_t size;
@@ -138,17 +157,13 @@ typedef struct header
 \end{lstlisting}
 
 To lighten up our program, we can reduce all this to a simple variable and the meta-data block can be defined in C as:
-\begin{lstlisting}
-typedef size_t header;
-\end{lstlisting}
-Notice that this is quite enough to implement an allocator since we can get the bock size by doing a bitwise operation and the following chunk by summing the current chunk chunk and the size but also encode the free flag in 1 bit with this variable.
-\begin{lstlisting}
+\begin{lstlisting}[style=cstyle]
 typedef size_t header;
 \end{lstlisting}
 
-To make the allocation and deallocation operations very simple, another data structure can be used: the free list which operates by connecting unallocated regions of memory together in a linked list. In the above structure  the field ``nxt'' will help us to build it.
+To make the allocation and deallocation operations very simple, another data structure can be used: the free list which operates by connecting unallocated regions of memory together in a linked list \ref{freelist}. In the above structure we the field ``nxt'' will help us to build it.
 To implement an allocator with a free list, we can use the structure below:
-\begin{lstlisting}
+\begin{lstlisting}[style=cstyle]
 typedef struct header
 {
   size_t size;			
@@ -156,12 +171,112 @@ typedef struct header
 } header;
 \end{lstlisting}
 
+\begin{figure}[htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/freelist}
+    \caption{Heap with free list in green}
+    \label{freelist}
+    \end{center}
+\end{figure}
+
+Notice that this is quite enough to implement an allocator since we can get the bock size by doing a bitwise operation and the following chunk by summing the current chunk and the size but also encode the free flag in 1 bit with this variable.
+
+\begin{lstlisting}[style=cstyle]
+// methods to get header information
+#define HDR_GET_SIZE(p)   (p->size & (~1))
+#define HDR_GET_STATUS(p)   (p->size & 1)
+#define HDR_GET_NEXT(p)   ((header*) p + HDR_GET_SIZE(p))
+#define HDR_SET_SIZE(p,nh)  p->size = (((nh + 1) >> 1) << 1) & (~HDR_GET_STATUS(p))
+#define HDR_SET_STATUS(p)   p->size = p->size | 1
+#define HDR_UNSET_STATUS(p) p->size = p->size & (~1)
+\end{lstlisting}
+
 The figure \ref{chunkrep} presents an example of heap organization with meta-data in front of the allocated block. Each data chunk has a meta-data block followed by a data block. Note that the pointer returned by malloc points on the data block, not on the whole chunk.\\
 
-\subsection{How to find a chunk}
-
+\subsection{Allocation Algorithms}
+  One of the important part of malloc is the way that thunk are found and allocated. In what follows, we will discuss some policies and algorithms used to perform a dynamic allocation
+%First-fit method
 \subsubsection{First-fit method}
+The first fit method allocates the process to a partition which is the first sufficient chunk from the top of Main Memory \ref{ff_alg}.
 
+In lazy allocators, if the search fails, a garbage collection will be done, and then try to allocate again.
+
+If there’s still no free block big enough for the process, the only choice is to increase the size of the heap (if possible) with \code{sbrk()}, and then try the allocation again.
+If you can’t increase the size of the heap
+
+\begin{figure}[htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/FF_alg}
+    \caption{First fit execution }
+    \label{ff_alg}
+    \end{center}
+\end{figure}
+
+%first fit algorithm
+\begin{algorithm}
+\caption{Algorithm for allocate (n)}
+\begin{algorithmic} 
+\REQUIRE $n \geq 0$
+\STATE $size(block) \leftarrow n + size(header)$  
+\STATE Scan free list for first block with $nWords \geq size(block)$ 
+\IF{block not found} 
+  \STATE Failure (time for garbage collection!) 
+\ELSIF{free block $nWords \geq size(block) + threshold$} 
+   \STATE Split into a free block and an in-use block 
+   \STATE Free block $nWords \leftarrow Free block nWords - size(block) $
+   \STATE In-use block $nWords \leftarrow size(block) $
+    \STATE Return pointer to in-use block 
+\ELSE 
+    \STATE Unlink block from free list 
+    \STATE Return pointer to block 
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+*threshold must be at least size(header) + 1 to leave room for header and link \\
+
+\begin{itemize}
+\item Its main advantage is that it is the fastest search as it searches only the first block i.e. enough to assign a process.
+\end{itemize}
+
+%best fit algo
 \subsubsection{Best-fit method}
+The best fit method allocates the process to a partition which is the smallest sufficient partition among the free available partitions in the main memory\ref{bf_alg}.
 
-\subsection{Extension of the heap}
+if the search fails we'll use the same process we describe before in first fit method.
+
+\begin{figure}[htbp]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{figures/BF_alg}
+    \caption{Best fit execution }
+    \label{bf_alg}
+    \end{center}
+\end{figure}
+%best fit algorithm
+\begin{algorithm}
+\caption{Algorithm for allocate (n)}
+\begin{algorithmic} 
+\REQUIRE $n \geq 0$
+
+\STATE $size(block) \leftarrow n + size(header)$ 
+\STATE Scan free list for smallest block with $ nWords \geq size(block)$ 
+\IF{block not found} 
+  \STATE  Failure (time for garbage collection!) 
+\ELSIF{ $nWords \geq size(block) + threshold$}
+   \STATE Split into a free block and an in-use block 
+   \STATE Free block  $nWords = Free block nWords - size(block) $
+   \STATE In-use block $nWords = size(block) $
+   \STATE Return pointer to in-use block 
+\ELSE 
+   \STATE Unlink block from free list 
+   \STATE Return pointer to block 
+\ENDIF
+
+\end{algorithmic}
+\end{algorithm}
+
+*threshold must be at least size(header) + 1 to leave room for header and link \\
+
+
+Although, best fit minimizes the wastage space, it consumes a lot of processor time for searching the block which is close to required size. Also, Best-fit may perform poorer than other algorithms in some cases.
+ 
