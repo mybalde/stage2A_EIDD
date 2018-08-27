@@ -23,9 +23,9 @@ A new dynamic request for memory might return a range of addresses out of one of
 
 If too many small holes develop, memory is wasted because the total memory used by the holes may be large, but the holes cannot be used to satisfy dynamic requests. This situation is called memory fragmentation \cite{Knuth73a}. Keeping track of allocated and deallocated memory is complicated. A modern operating system does all this.\\
 
-Two functions make it possible to reserve and release dynamically an area of memory: \code{malloc()} for the reservation and the liberation of previously allocated memory via \code{malloc()} is provided by the \code{free()} function.
+Two functions make it possible to reserve and release dynamically an area of memory: \code{malloc()} for the reservation and the liberation of previously allocated memory via \code{malloc()} is provided by the \code{free()} function \cite{WikipediaDMA}.
 
-\subsection{What is malloc}
+\subsubsection{Memory allocation}
 malloc is a C Standard Library function which is used to allocate a block of memory on the heap. The program accesses this block of memory via a pointer that malloc returns.
 The function signature is:
 
@@ -35,7 +35,7 @@ void* malloc(size_t size);
 
 The only parameter to pass to malloc is the number of bytes to allocate. The returned value is the address of the first byte of the allocated memory area. If the allocation could not be realized (due to lack of free memory), the return value is the \code{NULL} constant.
 
-\subsection{Memory release}
+\subsubsection{Memory release}
 When memory returned by \code{malloc()} is no longer useful, it doesn't get freed on its own. In the order to release the space allocated before we should explicitly use another C Standard Library function: \code{free()} .
 The function signature is:
 \begin{lstlisting}[style=cstyle]
@@ -46,36 +46,37 @@ void free(void *ptr);
 \subsection{Goal for good allocators}
 An allocator must keep tracking parts of the memory which are in use and free.
 The main goals of a good allocator are \cite{Lea12}:
-\begin{enumerate}
+\begin{itemize}
 \item Maximizing compatibility
-\end{enumerate}
+\end{itemize}
 The implemented allocator must be compatible with ANSI/POSIX conventions.
 
-\begin{enumerate}
+\begin{itemize}
 \item Maximizing portability
-\end{enumerate}
+\end{itemize}
 The allocator must cover as many systems as possible.
-\begin{enumerate}
+\begin{itemize}
 \item Minimizing space
-\end{enumerate}
+\end{itemize}
 The allocator shouldn't waste space and track contiguous chunk to minimize fragmentation.
 
-\begin{enumerate}
+\begin{itemize}
 \item Minimizing time
-\end{enumerate}
+\end{itemize}
 The time for allocation and release of memory should be as short as possible.
 
-\begin{enumerate}
+\begin{itemize}
 \item Maximizing tunability
-\end{enumerate}
-
-\begin{enumerate}
+\end{itemize}
+Optional features and behavior should be controllable by users either statically (via \code{#define} and the like) or dynamically (via control commands such as \code{mallopt}).
+\begin{itemize}
 \item Maximizing Locality
-\end{enumerate}
-
-\begin{enumerate}
+\end{itemize}
+Allocating chunks of memory that are typically used together near each other. This helps minimize page and cache misses during program execution.
+\begin{itemize}
 \item Maximizing error detection
-\end{enumerate}
+\end{itemize}
+It does not seem possible for a general-purpose allocator to also serve as general-purpose memory error testing tool such as Purify. However, allocators should provide some means for detecting corruption due to overwriting memory, multiple frees, and so on.
 %\clearpage
 \section{Heap and System call}
 In the order to implement malloc, we need to understand how memory is handled in most operating systems.We will keep an abstract point of view for that part, since many details are system and
@@ -84,7 +85,7 @@ hardware dependent.
 \subsection{The Process’s Memory}
 Every process has its own virtual address space which is dynamically translated into physical memory  address space by the memory management unit ``MMU'', (and the kernel.) This space is divided in several parts, and what we should know is that we have found at least some space for the code, a stack where local and volatile data are stored, some space for constant and global variables and an unorganized space for program’s data called the heap.\\
 
-The heap is a continuous (in terms of virtual addresses) space of memory blocks with three bounds: a starting point, a maximum limit (managed through \code{sys/resource.h}’s functions \code{getrlimit()} and \code{setrlimit()}) and an end point called the break. The break marks the end of the mapped memory space, that is, the part of the virtual address space that has correspondence into real memory.\\
+The heap is a continuous (in terms of virtual addresses) space of memory blocks with three bounds: a starting point, a maximum limit (managed through \code{sys/resource.h}’s functions \code{getrlimit()} and \code{setrlimit()}) and an end point called the break. The break marks the end of the mapped memory space, that is, the part of the virtual address space that has correspondence into real memory \cite{WilsonJNB95}.\\
 
 \begin{figure}[H]
     \begin{center}
@@ -221,7 +222,7 @@ If you can’t increase the size of the heap
 \STATE Scan free list for first block with $nWords \geq size(block)$ 
 \IF{block not found} 
   \STATE Failure (time for garbage collection!) 
-\ELSIF{free block $nWords \geq size(block) + threshold$} 
+\ELSIF{free block $nWords \geq size(block) + size(header) + 1$} 
    \STATE Split into a free block and an in-use block 
    \STATE Free block $nWords \leftarrow Free block nWords - size(block) $
    \STATE In-use block $nWords \leftarrow size(block) $
@@ -232,8 +233,6 @@ If you can’t increase the size of the heap
 \ENDIF
 \end{algorithmic}
 \end{algorithm}
-
-*threshold must be at least size(header) + 1 to leave room for header and link \\
 
 \begin{itemize}
 \item Its main advantage is that it is the fastest search as it searches only the first block i.e. enough to assign a process.
@@ -262,7 +261,7 @@ if the search fails we'll use the same process we describe before in first fit m
 \STATE Scan free list for smallest block with $ nWords \geq size(block)$ 
 \IF{block not found} 
   \STATE  Failure (time for garbage collection!) 
-\ELSIF{ $nWords \geq size(block) + threshold$}
+\ELSIF{ $nWords \geq size(block) + size(header) + 1$}
    \STATE Split into a free block and an in-use block 
    \STATE Free block  $nWords = Free block nWords - size(block) $
    \STATE In-use block $nWords = size(block) $
@@ -274,8 +273,6 @@ if the search fails we'll use the same process we describe before in first fit m
 
 \end{algorithmic}
 \end{algorithm}
-
-*threshold must be at least size(header) + 1 to leave room for header and link \\
 
 
 Although, best fit minimizes the wastage space, it consumes a lot of processor time for searching the block which is close to required size. Also, Best-fit may perform poorer than other algorithms in some cases.
