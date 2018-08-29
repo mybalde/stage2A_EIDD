@@ -25,7 +25,7 @@
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{mGray},
     stringstyle=\color{mPurple},
-    basicstyle=\ttfamily,
+    basicstyle=\footnotesize\ttfamily,
     breakatwhitespace=false,         
     breaklines=true,                 
     captionpos=b,                    
@@ -35,7 +35,7 @@
     showspaces=false,                
     showstringspaces=false,
     showtabs=false,                  
-    tabsize=2,
+    tabsize=4,
     language=C
 }
 
@@ -61,7 +61,7 @@
 
 
 \HRule \\[0.4cm]
-{ \huge \bfseries Dynamic memory allocation in c}\\[0.4cm] 
+{ \huge \bfseries Dynamic Memory Allocation in C}\\[0.4cm] 
 \HRule \\[1.5cm]
  
  \textsc{\large second year internship report}\\[1.5cm] 
@@ -101,11 +101,12 @@ Mihaela \textsc{Sighireanu} % Supervisor's Name
 
 \end{titlepage}
 
-Les allocateurs sont des programmes petits mais très difficiles à mettre au point car ils appellent des primitives de programmation complexes: arithmetique des pointeurs, operations bit à bit, appels au système (pour étendre la memoire du processus). De plus, les structures de données sont assez complexes: heap-listes (champs suivant obtenu avec l'arithmetique des pointeurs), listes doublement chainées, circulaires, arbres binaires de recherche, tables de hachage. 
+Les allocateurs de memoire dynamique gèrent le tas (\emph{heap}) d'un program.
+Ils sont indispensables à tout langage de programmation moderne. En C, l'allocateur de memoire est inclu dans la bibliothèque standard; en Java, il fait partie de l'environnement d'exécution (\emph{runtime}).
+Le code de ces allocateurs est assez petit, mais il est notoirement difficile à mettre au point car il doit utiliser des primitives de programmation complexes: arithmetique des pointeurs, operations bit à bit, appels système. De plus, les structures de données que ce code utilise sont assez complexes: liste-tas (champs suivant obtenu avec l'arithmetique des pointeurs), listes doublement chainées, listes circulaires, arbres binaires de recherche, tables de hachage. 
 
-Pour mettre au point ces programmes, des techniques de verification formelles ont été developpées. Ces techniques sont basées sur des logiques de programmes (logique de Hoare). Mon travail a fournit des programmes de test de ces techniques.
-
-Dans mon stage j'ai mis au point ces allocateurs en utilisant du test unitaire et la  bibliotheque CUNIT.
+Pour mettre au point ces programmes, des techniques de verification formelles ont été developpées dans l'équipe ``Modélisation et Vérification'' de l'IRIF, où mon stage a eu lieu. Ces techniques sont basées sur des logiques de programmes. Mon travail a été de fournir des programmes de test pour ces techniques.
+J'ai donc mis au point quatre allocateurs en utilisant des techniques de test unitaire et en s'appuyant sur la  bibliotheque CUNIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
 

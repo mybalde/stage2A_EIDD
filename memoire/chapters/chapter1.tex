@@ -3,87 +3,54 @@
 %----------------------------------------------------------------------------------------
 \section{Introduction}
 % Context du stage, que as tu fait, ou, quand, resultats.
-Dynamic memory allocation has been a fundamental part of most computer systems since roughly 1960, and memory allocation is widely considered to be either a solved problem or an insoluble one.\\
 
-This report refers to the work I have completed during my summer internship with the IRIF at  Paris Diderot University - Paris 7 under the supervision of Mihaela Sighireanu. The work performed concern the study  of dynamic memory allocation , programming some allocators and testing their efficiency.\\
-
- In this report I'll describe a variety of Memory allocator design first and then, I will explain how I manage to test my programs.
-
-
-
+This report presents the work I have completed during my summer internship within the IRIF research institute at  Paris Diderot University, under the supervision of Mihaela Sighireanu. The work performed concerns the study  of \emph{dynamic memory allocators} and the coding of some of them.
 
 %----------------------------------------------------------------------------------------
 %	Presentation of IRIF SECTION
 %----------------------------------------------------------------------------------------
 
 \subsection{Presentation of IRIF}
-\textbf{Research Institute on the Foundations of Computer Science }
-(IRIF) is a research unit co-founded by the CNRS and the University Paris-Diderot, as UMR 8243. IRIF hosts two INRIA project-teams. IRIF is also member of the Foundation of Mathematical Sciences of Paris (FSMP) and of the Federation of Research in Mathematics of Paris. \\
+% Use \emph and not \textbf
+IRIF (abbreviation for the french translation of \emph{Research Institute on the Foundations of Informatics})
+is a research unit co-founded by the CNRS and the University Paris-Diderot, as UMR 8243. IRIF hosts two INRIA project-teams. IRIF is also member of the Foundation of Mathematical Sciences of Paris (FSMP) and of the Federation of Research in Mathematics of Paris\footnote{See \url{www.irif.fr}}. 
 
-IRIF results from the merging of the two research units LIAFA and PPS on January 1st, 2016. The scientific objectives of IRIF are at the core of computer science and, in particular, they focus on the conception, analysis, proof, and verification of algorithms, programs, and programming languages. They are built upon fundamental research activities developed at IRIF on combinatorics, graphs, logics, automata, type, semantics, and algebras.\\
+The scientific objectives of IRIF are at the core of computer science and, in particular, they focus on the conception, analysis, proof, and verification of algorithms, programs, and programming languages. They are built upon fundamental research activities developed at IRIF on combinatorics, graphs, logics, automata, type, semantics, and algebras.
 
-At the CNRS, IRIF is primarily affiliated to the Institute of Computer Science (INS2I), and, secondarily, to the Institute of Mathematics (INSMI). IRIF is part of the Department of Computer Science of the University Paris-Diderot, and also hosts several members of the Department of Mathematics. Last, IRIF is affiliated to the doctoral school of Mathematical Sciences of Paris (ED 386).\\ 
+IRIF hosts currently (in January 2018) a hundred permanent members, including roughly 54 faculty members, 30 CNRS researchers, 6 INRIA researchers and 5 administrative and technical staffs. The total number of IRIF members, including PhD students, post-docs, and long-term visitors amounts for about two hundred. 
 
-IRIF is structured in nine thematic teams, grouped into three research poles: 
-\begin{itemize}
-\item Pole Algorithms and discrete structures:
-
-\begin{itemize}
-\item Algorithms and complexity
-\end{itemize}
-
-\begin{itemize}
-\item Combinatorics
-\end{itemize}
-
-\begin{itemize}
-\item Complex Systems, Networks, and Distributed Computing 
-\end{itemize}
-
-\begin{itemize}
-\item Theory and algorithmics of graphs 
-\end{itemize}
-
-\end{itemize}
-
-\begin{itemize}
-\item Pole Automata, structures and verification:
-
-\begin{itemize}
-\item Automata and applications
-\end{itemize}
-\begin{itemize}
-\item Modeling and verification
-\end{itemize}
-
-\end{itemize}
-
-\begin{itemize}
-\item Pole Proofs, programs and systems:
-\begin{itemize}
-\item Algebra and computation
-\end{itemize}
-\begin{itemize}
-\item Analysis and conception of systems 
-\end{itemize}
-\begin{itemize}
-\item Proofs and programs
-\end{itemize}
-
-\end{itemize}
-IRIF hosts currently a hundred permanent members), including roughly 54 faculty members, 30 CNRS researchers, 6 INRIA researchers and 5 administrative and technical staffs (in January 2018). The total number of IRIF members, including PhD students, post-docs, and long-term visitors amounts for about two hundred. \\
-
-I've done my internship the the ``modeling and verification'' team, which studies and develops methods and tools for the software verification.
+IRIF is structured in nine thematic teams, grouped into three research poles.
+I've done my internship the the ``Modeling and verification'' team of the pole ``Automata, structures and verification''. The team studies and develops methods and tools for the software verification.
 
 
 %----------------------------------------------------------------------------------------
 %	Motivation SECTION
 %----------------------------------------------------------------------------------------
 \subsection{Motivation}
-Allocators are small programs which are difficult to design because they use some primitives of complex programming: arithmetic of pointers, bitwise operations, system calls (for the expansion of process memory).   
-Furthermore, data structures are quite complex : heap list (the next field gotten with arithmetic of pointers) , linked and circular lists, binary search trees, hash tables.\\
 
-In the order to implement these programs, formal verification techniques have been developed. Those techniques are based on some logics of programs (logic of Hoare). My work has provided testing programs for these techniques.\\
+Dynamic memory allocation (DMA for short) has been a fundamental part of most computer systems since roughly 1960,
+see for example Knuth's book~\cite{Knuth73a},
+since it is an important part of the mechanisms allowing to manage program's memory.
+DMA are in charge of the dynamic memory of a program, also called the heap, but they do not belong in general to the low level operating system primitives. Indeed, the performances in time and memory consumption of the DMA depend on their usage.
+Therefore, there are different DMA implementations which are specialized for low level programming languages (like C/C++), high level programming languages (like Java) or specific usages (for real-time systems, for embedded systems, etc.).
 
-In my internship I developed some of these allocators using unit testing and the CUNIT library.\\
+The algorithms for such DMA and their performances are well studied, see for example~\cite{Knuth73a,WilsonJNB95}.
+Their correctness is difficult to establish because the DMA code generally uses complex programming primitives: pointer arithmetics, bitwise operations, system calls (for the expansion of process memory). 
+Some work exists on formal verification of such code, i.e., proving the correctness of DMA code using mathematics. These techniques are based on (i) logics specifying programs' configurations, also called program or Hoare's logics,
+and (ii) tools to manipulate proofs in these logics, e.g., theorem provers or static analysis.
 
+The research team in which I've did my internship developed such formal verification tools are need to test them on DMA code. My work was to provide such examples of DMA code. The examples may contain flaws or may pass a test suite checking some elementary properties of DMA. I also had to build such a test suite for the code I've developed.
+
+%----------------------------------------------------------------------------------------
+%	Document's plan SECTION
+%----------------------------------------------------------------------------------------
+\subsection{Overview}
+
+This document is organized as follows.
+Section~\ref{sec:heap} shortly introduces the organization of program's memory and the operating system's primitives allowing to manipulate this memory.
+These primitives are used by the DMA code, whose interface and properties are presented in Section~\ref{sec:dma}.
+The internals and the main algorithms used by DMA are presented in Section~\ref{sec:impl}.
+Section~\ref{sec:allocs} presents the allocators I've fixed or coded during my internship.
+The test suite used for these allocators is presented in Section~\ref{sec:test}.
+I conclude this work in Section~\ref{sec:conclu}.
+The code that I've developed is available in the appendixes.
