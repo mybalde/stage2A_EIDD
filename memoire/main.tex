@@ -105,7 +105,7 @@ Les allocateurs de memoire dynamique gèrent le tas (\emph{heap}) d'un program.
 Ils sont indispensables à tout langage de programmation moderne. En C, l'allocateur de memoire est inclu dans la bibliothèque standard; en Java, il fait partie de l'environnement d'exécution (\emph{runtime}).
 Le code de ces allocateurs est assez petit, mais il est notoirement difficile à mettre au point car il doit utiliser des primitives de programmation complexes: arithmetique des pointeurs, operations bit à bit, appels système. De plus, les structures de données que ce code utilise sont assez complexes: liste-tas (champs suivant obtenu avec l'arithmetique des pointeurs), listes doublement chainées, listes circulaires, arbres binaires de recherche, tables de hachage. 
 
-Pour mettre au point ces programmes, des techniques de verification formelles ont été developpées dans l'équipe ``Modélisation et Vérification'' de l'IRIF, où mon stage a eu lieu. Ces techniques sont basées sur des logiques de programmes. Mon travail a été de fournir des programmes de test pour ces techniques.
+Pour mettre au point ces programmes, des techniques de verification formelles ont été developpées par l'équipe ``Modélisation et Vérification'' de l'IRIF, où mon stage a eu lieu. Ces techniques sont basées sur des logiques de programmes. Mon travail a été de fournir des programmes de test pour ces techniques.
 J'ai donc mis au point quatre allocateurs en utilisant des techniques de test unitaire et en s'appuyant sur la  bibliotheque CUNIT.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
@@ -115,10 +115,23 @@ J'ai donc mis au point quatre allocateurs en utilisant des techniques de test un
 %----------------------------------------------------------------------------------------
 %	Report CONTENT - CHAPTERS
 %----------------------------------------------------------------------------------------
-\include{chapters/chapter1}
-\include{chapters/chapter2}
-\include{chapters/chapter3}
+\input{chapters/chapter1}
+\input{chapters/chapter2}
+\input{chapters/chapter3}
+
+\section{Conclusion}
+
+This internship was an opportunity to revise C programming and the notions learnt during the ``Operating Systems'' course.
+In addition, I've learnt how to write unit tests using CUNIT library.
+I also learnt how to write documents using \LaTeX.
+
 
 \bibliographystyle{plain}
 \bibliography{bibli}
+
+\newpage
+\appendix
+\input{chapters/appendix}
+
+
 \end{document}
